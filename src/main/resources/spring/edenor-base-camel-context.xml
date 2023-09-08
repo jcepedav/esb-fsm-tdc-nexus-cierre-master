@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:cxf="http://camel.apache.org/schema/cxf"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:sec="http://cxf.apache.org/configuration/security"
+	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xmlns:cxf-core="http://cxf.apache.org/core"
+	   xsi:schemaLocation="
+	    http://cxf.apache.org/configuration/security
+	    http://cxf.apache.org/schemas/configuration/security.xsd
+	    http://cxf.apache.org/transports/http/configuration
+	    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    	http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+    	http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans.xsd
+    	http://camel.apache.org/schema/spring
+    	http://camel.apache.org/schema/spring/camel-spring.xsd
+    	http://camel.apache.org/schema/cxf
+    	http://camel.apache.org/schema/cxf/camel-cxf-2.8.3.xsd">
+
+
+	<cxf-core:bus/>
+
+	<bean id="exceptionHandler" class="ar.com.edenor.ocp.exceptions.ExceptionHandler">
+		<property name="responseBuilder" ref="responseBuilder"/>
+	</bean>
+
+
+	<bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+
+	<bean id="setWebServiceParameterProcessor"	class="ar.com.edenor.ocp.processors.SetWebServiceParameterProcessor" />
+	<bean id="setWebServiceResponseProcessor"	class="ar.com.edenor.ocp.processors.SetWebServiceResponseProcessor" />
+	<bean id="unrecognizedPropertyExceptionMapper"	class="ar.com.edenor.ocp.exceptions.UnrecognizedPropertyExceptionMapper" >
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+		<property name="endPointAddress" value="${edenor.integration.name}"/>
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="responseBuilder" ref="responseBuilder"/>
+	</bean>
+	<bean id="mismatchedInputExceptionMapper"	class="ar.com.edenor.ocp.exceptions.MismatchedInputExceptionMapper" >
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+		<property name="endPointAddress" value="${edenor.integration.name}"/>
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="responseBuilder" ref="responseBuilder"/>
+	</bean>
+
+
+	<!-- Endpoint to Nexus-->
+	<cxf:cxfEndpoint id="nexusEndpoint"
+					 serviceClass="com.prometium.idms.interfaces.fsm.gen.cerrar.CerrarTdCPort"
+					 address="${endpoint.nexusApi.address}"
+					 wsdlURL="wsdl/cerrarTdC.wsdl"
+					 loggingFeatureEnabled="false">
+		<cxf:properties>
+			<entry key="dataFormat" value="POJO"/>
+			<entry key="wrapped" value="true"/>
+			<entry key="Content-Type" value="text/xml" />
+		</cxf:properties>
+		<cxf:inInterceptors>
+			<ref bean="edenorLoggingInInterceptor"/>
+			<ref bean="soapPostInvokeInterceptor"/>
+		</cxf:inInterceptors>
+		<cxf:outInterceptors>
+			<ref bean="soapPreInvokeInterceptor"/>
+			<ref bean="edenorLoggingOutInterceptor"/>
+		</cxf:outInterceptors>
+	</cxf:cxfEndpoint>
+
+	<!-- Api Rest Endpoint-->
+	<cxf:rsServer id="apiRestEndpoint"
+				  address="/"
+				  serviceClass="ar.com.edenor.ocp.api.ApiRestResource"
+				  loggingFeatureEnabled="false">
+		<cxf:providers>
+			<ref bean="securityHandler"/>
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
+			<ref bean="unrecognizedPropertyExceptionMapper"/>
+			<ref bean="mismatchedInputExceptionMapper"/>			
+		</cxf:providers>
+		<cxf:properties>
+			<entry key="default.wae.mapper.least.specific" value="true"/>
+		</cxf:properties>
+		<cxf:inInterceptors>
+			<ref bean="edenorLoggingInInterceptor"/>
+			<ref bean="restPreInvokeInterceptor"/>
+		</cxf:inInterceptors>
+		<cxf:outInterceptors>
+			<ref bean="edenorLoggingOutInterceptor"/>
+			<ref bean="restPostInvokeInterceptor"/>
+		</cxf:outInterceptors>
+	</cxf:rsServer>
+
+
+
+	<camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+		<routeContextRef ref="my-integration-routes"/>
+
+		<dataFormats>
+			<json id="json" prettyPrint="true" library="Jackson"/>
+			<json id="jsonResponse" prettyPrint="true" library="Jackson" useList="true"
+				  unmarshalTypeName="ar.com.edenor.ocp.api.ApiRestResponse"/>
+		</dataFormats>
+
+
+		<onException>
+			<exception>java.net.ConnectException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="connectException" uri="bean:exceptionHandler?method=onConnectionException"/>
+		</onException>
+
+		<onException>
+			<exception>java.net.SocketException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="socketException" uri="bean:exceptionHandler?method=onConnectionException"/>
+		</onException>
+
+		<onException>
+			<exception>java.net.SocketTimeoutException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="socketTimeoutException" uri="bean:exceptionHandler?method=onConnectionException"/>
+		</onException>
+
+		<onException>
+			<exception>ar.com.edenor.ocp.exceptions.BusinessException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="businessException" uri="bean:exceptionHandler?method=onBusinessException"/>
+		</onException>
+
+		<onException>
+			<exception>org.apache.cxf.transport.http.HTTPException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="httpException" uri="bean:exceptionHandler?method=onHttpException"/>
+		</onException>
+
+		<onException>
+			<exception>java.lang.Exception</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="httpException" uri="bean:exceptionHandler?method=genericException"/>
+		</onException>
+
+		<onException>
+			<exception>org.apache.cxf.binding.soap.SoapFault</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="httpException" uri="bean:exceptionHandler?method=onSoapFaultException"/>
+		</onException>
+		<onException>
+			<exception>org.apache.cxf.interceptor.Fault</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="httpException" uri="bean:exceptionHandler?method=onInterceptorFaultException"/>
+		</onException>
+
+		<onException>
+			<exception>java.net.UnknownHostException</exception>
+			<handled>
+				<constant>true</constant>
+			</handled>
+			<marshal>
+				<custom ref="jsonResponse"/>
+			</marshal>
+			<to id="httpException" uri="bean:exceptionHandler?method=onConnectionException"/>
+		</onException>
+
+		<interceptFrom uri="cxfrs*">
+			<setProperty propertyName="TOKEN_EDENOR">
+				<simple>${header.Authorization}</simple>
+			</setProperty>
+		</interceptFrom>
+
+
+	</camelContext>
+
+</beans>

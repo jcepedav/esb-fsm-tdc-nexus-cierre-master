@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:cxf="http://camel.apache.org/schema/cxf"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xsi:schemaLocation="
+	    http://cxf.apache.org/transports/http/configuration
+	    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    	http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans.xsd      
+    	http://camel.apache.org/schema/spring 
+    	http://camel.apache.org/schema/spring/camel-spring.xsd      
+    	http://camel.apache.org/schema/cxf 
+    	http://camel.apache.org/schema/cxf/camel-cxf-2.8.3.xsd">
+
+
+	<bean id="responseBuilder" class="ar.com.edenor.ocp.api.CerrarTareaResponseImpl" />
+
+	<routeContext xmlns="http://camel.apache.org/schema/spring"
+				  id="my-integration-routes">
+
+		<route id="rutaPrincipal">
+			<from uri="cxfrs:bean:apiRestEndpoint?bindingStyle=SimpleConsumer&amp;bridgeErrorHandler=true"/>
+			<recipientList>
+				<simple>direct:${header.operationName}</simple>
+			</recipientList>
+		</route>
+
+		<route id="cerrarTdcId">
+			<from uri="direct:doAction"/>
+			<process ref="setWebServiceParameterProcessor" />
+			<to uri="cxf:bean:nexusEndpoint"/>
+			<process ref="setWebServiceResponseProcessor" />
+		</route>
+	</routeContext>
+
+
+</beans>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://com/prometium/idms/interfaces/fsm/gen/cerrar" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://com/prometium/idms/interfaces/fsm/gen/cerrar" targetNamespace="http://com/prometium/idms/interfaces/fsm/gen/cerrar">
+  <wsdl:types>
+    <s:schema xmlns:em="http://com/prometium/idms/interfaces/fsm/gen/cerrar" xmlns:s="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://com/prometium/idms/interfaces/fsm/gen/cerrar"> 
+	
+	<s:simpleType name="alfanumerico255">
+		<s:restriction base="s:string">
+			<s:minLength value="0"/>
+			<s:maxLength value="255"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	<s:simpleType name="alfanumerico500">
+		<s:restriction base="s:string">
+			<s:minLength value="0"/>
+			<s:maxLength value="500"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	<s:simpleType name="alfanumerico64">
+		<s:restriction base="s:string">
+			<s:minLength value="0"/>
+			<s:maxLength value="64"/>
+		</s:restriction>
+	</s:simpleType>
+	
+   	<s:simpleType name="alfanumerico40">
+		<s:restriction base="s:string">
+				<s:minLength value="0"/>
+				<s:maxLength value="40"/>
+		</s:restriction>
+	</s:simpleType>
+
+   	<s:simpleType name="alfanumerico20">
+		<s:restriction base="s:string">
+				<s:minLength value="0"/>
+				<s:maxLength value="20"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	<s:simpleType name="alfanumerico10">
+		<s:restriction base="s:string">
+				<s:minLength value="0"/>
+				<s:maxLength value="10"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	<s:simpleType name="alfanumerico3">
+		<s:restriction base="s:string">
+				<s:minLength value="0"/>
+				<s:maxLength value="3"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	
+	<s:simpleType name="alfanumerico100">
+		<s:restriction base="s:string">
+			<s:minLength value="0"/>
+			<s:maxLength value="100"/>
+		</s:restriction>
+	</s:simpleType>
+	
+	
+	<s:element name="CerrarTdCRequest">
+		<s:complexType>
+			<s:sequence>
+				<s:element maxOccurs="1" minOccurs="0" name="requestId" type="em:alfanumerico100"/>
+				<s:element maxOccurs="1" minOccurs="1" name="sourceSystem" type="em:alfanumerico20"/>
+				<s:element maxOccurs="1" minOccurs="1" name="externalCode" type="em:alfanumerico255"/>
+				<s:element maxOccurs="1" minOccurs="0" name="foreman" type="em:alfanumerico40"/>
+				<s:element maxOccurs="1" minOccurs="0" name="code" type="em:alfanumerico40"/>
+				<s:element maxOccurs="1" minOccurs="0" name="description" type="em:alfanumerico100"/>
+				<s:element maxOccurs="1" minOccurs="0" name="outcomeCause" type="em:alfanumerico20"/>
+				<s:element maxOccurs="1" minOccurs="0" name="outcomeNotes" type="em:alfanumerico500"/>
+				<s:element maxOccurs="1" minOccurs="0" name="outcomeStartDate" type="s:dateTime"/>
+				<s:element maxOccurs="1" minOccurs="0" name="outcomeEndDate" type="s:dateTime"/>
+				<s:element maxOccurs="1" minOccurs="0" name="anomaly" type="s:boolean"/>
+				<s:element maxOccurs="1" minOccurs="0" name="comments" type="em:alfanumerico255"/>
+				<s:element maxOccurs="1" minOccurs="0" name="seal" type="s:boolean"/>
+				<s:element maxOccurs="1" minOccurs="0" name="installation" type="em:alfanumerico64"/>
+				<s:element maxOccurs="1" minOccurs="0" name="installationId" type="s:long"/>
+				<s:element maxOccurs="1" minOccurs="0" name="cause" type="em:alfanumerico64"/>
+				<s:element maxOccurs="1" minOccurs="0" name="causeId" type="s:long"/>
+				<s:element maxOccurs="1" minOccurs="0" name="activities" type="em:alfanumerico64"/>
+				<s:element maxOccurs="1" minOccurs="0" name="activitiesId" type="s:long"/>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+
+	<s:element name="CerrarTdCResponse">
+		<s:complexType>
+			<s:sequence>
+				<s:element name="status" type="em:alfanumerico3"/>
+				<s:element name="errorCode" type="em:alfanumerico10"/>
+				<s:element name="errorDescription" type="em:alfanumerico100"/>
+			</s:sequence>
+		</s:complexType>
+	</s:element>
+</s:schema>
+  </wsdl:types>
+  <wsdl:message name="CerrarTdCResponse">
+    <wsdl:part element="tns:CerrarTdCResponse" name="CerrarTdCResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="CerrarTdCRequest">
+    <wsdl:part element="tns:CerrarTdCRequest" name="CerrarTdCRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="cerrarTdCPort">
+    <wsdl:operation name="CerrarTdC">
+      <wsdl:input message="tns:CerrarTdCRequest" name="CerrarTdCRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:CerrarTdCResponse" name="CerrarTdCResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="cerrarTdCPortSoap11" type="tns:cerrarTdCPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="CerrarTdC">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="CerrarTdCRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="CerrarTdCResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="cerrarTdCPortService">
+    <wsdl:port binding="tns:cerrarTdCPortSoap11" name="cerrarTdCPortSoap11">
+      <soap:address location="http://srvnaranja:8484/ws/*"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

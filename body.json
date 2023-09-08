@@ -1,0 +1,41 @@
+{
+
+    "requestID": "EDN0003246647",
+
+    "sourceSystem": "PRM",
+
+    "externalCode": "D-23-09-013258_10174357",
+
+    "foreman": "jcdominguez",
+
+    "code": "AT SM 21",
+
+    "description": "CUA AT SM-DOMINGUEZ JUAN",
+
+    "outcomeCause": "Realizada",
+
+    "outcomeNotes": "se retiro peligro se coloco tapa monofasica en caja toma. ",
+
+    "outcomeStartDate": "2023-09-06T16:11:00",
+
+    "outcomeEndDate": "2023-09-06T16:28:00",
+
+    "anomaly": false,
+
+    "comments": " / False / se retiro peligro se coloco tapa monofasica en caja toma. ",
+
+    "seal": false,
+
+    "installation": "Toma BT",
+
+    "installationId": "13",
+
+    "cause": "Solicitado por el cliente",
+
+    "causeId": "40",
+
+    "activities": "Retiro de Peligro",
+
+    "activitiesId": "31"
+
+}

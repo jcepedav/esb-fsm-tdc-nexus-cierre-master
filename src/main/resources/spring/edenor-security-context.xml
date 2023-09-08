@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xmlns:sec="http://cxf.apache.org/configuration/security"
+	   xsi:schemaLocation="
+	    http://cxf.apache.org/transports/http/configuration
+	    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    	http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<!--Edenor Security Beans Section -->
+	<bean id="keycloakClient" class="ar.com.edenor.ocp.security.KeycloakClient" scope="singleton" init-method="init"/>
+
+	<bean id="authenticationInterceptor" class="ar.com.edenor.ocp.security.RestSecurityInterceptor">
+		<property name="kClient" ref="keycloakClient"/>
+	</bean>
+
+	<bean id="securityHandler" class="ar.com.edenor.ocp.security.EdenorAuthorizingFilter">
+		<property name="interceptor" ref="authenticationInterceptor"/>
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="responseBuilder" ref="responseBuilder"/>
+	</bean>
+
+	<!-- Geocall Securitu Beans Section-->
+	<!-- cxf Geocall Factory client-->
+	<bean id="geocallAccessTokenServiceClientFactory" class="org.apache.cxf.jaxrs.client.JAXRSClientFactoryBean">
+		<property name="address" value="${endpoint.login.address}"/>
+		<property name="headers">
+			<map>
+				<entry key="Accept" value="application/json"/>
+				<entry key="Content-Type" value="application/json"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="geocallAccessTokenServiceClient" factory-bean="geocallAccessTokenServiceClientFactory" factory-method="createWebClient"/>
+
+	<bean id="geocallBearerAuthSupplier" class="ar.com.edenor.ocp.security.client.GeocallBearerAuthSupplier">
+		<constructor-arg value="Bear"/>
+		<property name="refreshEarly" value="true"/>
+		<property name="accessTokenServiceClient" ref="geocallAccessTokenServiceClient"/>
+	</bean>
+
+
+	<!-- ======================================== CXF SOAP client endpoint ======================================== -->
+	<!-- Timeout configuration for CXF endpoint -->
+	<!-- Timeout value is hardcoded (to 1 minute) due to a bug in Spring or Cxf - the schema validation is done before -->
+	<!-- replacing the property's value -->
+
+	<!-- ======================================== CXF SOAP client endpoint ======================================== -->
+	<!-- Timeout configuration for CXF endpoint -->
+	<!-- Timeout value is hardcoded (to 1 minute) due to a bug in Spring or Cxf - the schema validation is done before -->
+	<!-- replacing the property's value -->
+
+	<http:conduit id="httpConduit"  name="${endpoint.nexusApi.address}">
+		<http:tlsClientParameters secureSocketProtocol="SSL" useHttpsURLConnectionDefaultSslSocketFactory="true" disableCNCheck="${disableHostnameCheck}">
+		</http:tlsClientParameters>
+		<http:client AutoRedirect="true" Connection="Keep-Alive"
+					 ReceiveTimeout="${connectionTimeout}" ConnectionTimeout="${connectionTimeout}"  />
+		<http:authorization>
+                       <sec:UserName>${service.nexus.user}</sec:UserName>
+                       <sec:Password>${service.nexus.password}</sec:Password>
+                       <sec:AuthorizationType>Basic</sec:AuthorizationType>
+                </http:authorization>
+	</http:conduit>
+
+
+</beans>

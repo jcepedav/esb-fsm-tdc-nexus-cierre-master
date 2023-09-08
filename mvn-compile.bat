@@ -1,0 +1,1 @@
+mvn  -Djavax.net.ssl.trustStore=certs/cacerts -Djavax.net.ssl.trustStorePassword= -Dmaven.wagon.http.ssl.ignore.validity.dates=true -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true -s configuration/settings.xml clean compile

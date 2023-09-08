@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:http="http://cxf.apache.org/transports/http/configuration"
+	   xsi:schemaLocation="
+	    http://cxf.apache.org/transports/http/configuration
+	    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    	http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<bean id="requestIdGeneratorBean" class="ar.com.edenor.ocp.idgenerator.RequestIdGeneratorBean" />
+
+	<bean id="edenorLoggingInInterceptor" class="ar.com.edenor.ocp.logging.CrearTareaLoggingInInterceptor">
+		<property name="edenorIntegrationType" value="${edenor.integration.type}"/>
+	</bean>
+
+	<bean id="edenorLoggingOutInterceptor" class="ar.com.edenor.ocp.logging.EdenorLoggingOutInterceptor"/>
+
+	<bean id="restPreInvokeInterceptor" class="ar.com.edenor.ocp.interceptors.RestPreInvokeInterceptor">
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+		<property name="endPointAddress" value="${edenor.integration.name}"/>
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="requestIdGeneratorBean" ref="requestIdGeneratorBean"/>
+	</bean>
+	<bean id="restPostInvokeInterceptor" class="ar.com.edenor.ocp.interceptors.RestPostInvokeInterceptor">
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+		<property name="endPointAddress" value="${edenor.integration.name}"/>
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+	</bean>
+
+	<bean id="soapPreInvokeInterceptor" class="ar.com.edenor.ocp.interceptors.SoapPreInvokeInterceptor">
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="requestIdGeneratorBean" ref="requestIdGeneratorBean"/>
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+	</bean>
+	<bean id="soapPostInvokeInterceptor" class="ar.com.edenor.ocp.interceptors.SoapPostInvokeInterceptor">
+		<property name="sourceSystem" value="${edenor.source.system}"/>
+		<property name="edenorIntegrationName" value="${edenor.integration.name}"/>
+	</bean>
+	<bean id="soapInFaultSoapInterceptor" class="ar.com.edenor.ocp.interceptors.SoapInFaultSoapInterceptor" />
+	<bean id="soapOutFaultSoapInterceptor" class="ar.com.edenor.ocp.interceptors.SoapOutFaultSoapInterceptor" />
+
+</beans>
